@@ -1,4 +1,4 @@
-# Project 01 - Serverless Framework Requirement
+# Project 01 - Serverless Framework
 
 **Scenario**:  
 You are a DevOps engineer at a startup building a serverless REST API for a microservices-based application. Your task is to set up the infrastructure and deployment pipeline to support the development team. The API will be built using AWS Lambda and API Gateway, with a focus on serverless architecture and observability.

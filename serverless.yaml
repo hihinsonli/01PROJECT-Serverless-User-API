@@ -1,0 +1,114 @@
+service: user-api-${opt:stage, 'dev'}
+
+provider:
+  name: aws
+  runtime: nodejs18.x
+  region: ${opt:region, 'us-east-1'}
+  stage: ${opt:stage, 'dev'}
+  environment:
+    TABLE_NAME: ${self:custom.tableName}
+  iam:
+    role:
+      statements:
+        - Effect: Allow
+          Action:
+            - dynamodb:PutItem
+            - dynamodb:GetItem
+            - dynamodb:Scan
+          Resource: "arn:aws:dynamodb:${self:provider.region}:*:table/${self:custom.tableName}"
+        - Effect: Allow
+          Action:
+            - logs:CreateLogGroup
+            - logs:CreateLogStream
+            - logs:PutLogEvents
+          Resource: "*"
+
+custom:
+  tableName: user-table-${self:provider.stage}
+  notificationEmail: ${opt:notificationEmail, 'example@domain.com'}
+
+package:
+  patterns:
+    - '!node_modules/**'  # Exclude node_modules by default to avoid conflicts
+    - 'node_modules/**'   # Include node_modules explicitly after installing dependencies
+    - 'js/**'            # Include the js directory with your code
+
+functions:
+  getUsers:
+    handler: js/getUsers.handler
+    events:
+      - http:
+          path: /users
+          method: get
+  postUsers:
+    handler: js/postUsers.handler
+    events:
+      - http:
+          path: /users
+          method: post
+
+resources:
+  Resources:
+    UserTable:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: ${self:custom.tableName}
+        AttributeDefinitions:
+          - AttributeName: userId
+            AttributeType: S
+        KeySchema:
+          - AttributeName: userId
+            KeyType: HASH
+        BillingMode: PAY_PER_REQUEST
+    SNSTopic:
+      Type: AWS::SNS::Topic
+      Properties:
+        TopicName: AlarmNotifications-${self:provider.stage}
+    GetUsersErrorAlarm:
+      Type: AWS::CloudWatch::Alarm
+      Properties:
+        AlarmName: GetUsersLambdaError-${self:provider.stage}
+        MetricName: Errors
+        Namespace: AWS/Lambda
+        Dimensions:
+          - Name: FunctionName
+            Value: ${self:service}-${self:provider.stage}-getUsers
+        Statistic: Sum
+        Period: 300
+        EvaluationPeriods: 1
+        Threshold: 1
+        ComparisonOperator: GreaterThanOrEqualToThreshold
+        AlarmActions:
+          - !Ref SNSTopic
+    PostUsersErrorAlarm:
+      Type: AWS::CloudWatch::Alarm
+      Properties:
+        AlarmName: PostUsersLambdaError-${self:provider.stage}
+        MetricName: Errors
+        Namespace: AWS/Lambda
+        Dimensions:
+          - Name: FunctionName
+            Value: ${self:service}-${self:provider.stage}-postUsers
+        Statistic: Sum
+        Period: 300
+        EvaluationPeriods: 1
+        Threshold: 1
+        ComparisonOperator: GreaterThanOrEqualToThreshold
+        AlarmActions:
+          - !Ref SNSTopic
+    ApiGateway4xxAlarm:
+      Type: AWS::CloudWatch::Alarm
+      Properties:
+        AlarmName: ApiGateway4xxError-${self:provider.stage}
+        MetricName: 4XXError
+        Namespace: AWS/ApiGateway
+        Dimensions:
+          - Name: ApiName
+            Value: ${self:service}-${self:provider.stage}
+        Statistic: Sum
+        Period: 300
+        EvaluationPeriods: 1
+        Threshold: 1
+        ComparisonOperator: GreaterThanOrEqualToThreshold
+        AlarmActions:
+          - !Ref SNSTopic
