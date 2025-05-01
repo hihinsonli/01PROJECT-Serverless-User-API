@@ -1,0 +1,78 @@
+name: Serverless Deploy and Remove
+
+on:
+  workflow_dispatch:
+    inputs:
+      stage:
+        description: 'Serverless stage (e.g., dev)'
+        required: true
+        default: 'dev'
+      region:
+        description: 'AWS region (e.g., ap-southeast-2)'
+        required: true
+        default: 'ap-southeast-2'
+      action:
+        description: 'Action to perform (deploy or remove)'
+        required: true
+        default: 'deploy'
+        type: choice
+        options:
+          - deploy
+          - remove
+
+jobs:
+  deploy:
+    name: Deploy Serverless Application
+    if: github.event.inputs.action == 'deploy'
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+      contents: read
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 18
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: arn:aws:iam::154864927037:role/GitHubActionsRole
+          aws-region: ${{ github.event.inputs.region }}
+
+      - name: Deploy with Serverless Framework
+        run: npx serverless deploy --stage ${{ github.event.inputs.stage }} --region ${{ github.event.inputs.region }}
+
+  remove:
+    name: Remove Serverless Application
+    if: github.event.inputs.action == 'remove'
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+      contents: read
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 18
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: arn:aws:iam::154864927037:role/GitHubActionsRole
+          aws-region: ${{ github.event.inputs.region }}
+
+      - name: Remove with Serverless Framework
+        run: npx serverless remove --stage ${{ github.event.inputs.stage }} --region ${{ github.event.inputs.region }}

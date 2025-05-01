@@ -5,6 +5,10 @@ provider:
   runtime: nodejs18.x
   region: ${opt:region, 'us-east-1'}
   stage: ${opt:stage, 'dev'}
+  deploymentBucket:
+    name: hinson-li-cloudformation-artifacts-bucket-30042025-zdtG4jfTdw
+    serverSideEncryption: AES256
+    versioning: true
   environment:
     TABLE_NAME: ${self:custom.tableName}
   iam:
