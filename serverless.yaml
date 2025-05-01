@@ -6,7 +6,7 @@ provider:
   region: ${opt:region, 'us-east-1'}
   stage: ${opt:stage, 'dev'}
   deploymentBucket:
-    name: hinson-li-cloudformation-artifacts-bucket-30042025-zdtG4jfTdw
+    name: cloudformation-artifacts-bucket-zdtg4jftdws
     serverSideEncryption: AES256
     versioning: true
   environment:

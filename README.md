@@ -113,7 +113,9 @@ cat << EOF > github-actions-trust-policy.json
       "Action": "sts:AssumeRoleWithWebIdentity",
       "Condition": {
         "StringEquals": {
-          "token.actions.githubusercontent.com:aud": "sts.amazonaws.com",
+          "token.actions.githubusercontent.com:aud": "sts.amazonaws.com"
+        },
+        "StringLike": {
           "token.actions.githubusercontent.com:sub": "repo:hihinsonli/01PROJECT-Serverless-User-API:*"
         }
       }

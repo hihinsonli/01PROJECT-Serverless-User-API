@@ -25,6 +25,7 @@ jobs:
     name: Deploy Serverless Application
     if: github.event.inputs.action == 'deploy'
     runs-on: ubuntu-latest
+    environment: development
     permissions:
       id-token: write
       contents: read
@@ -40,19 +41,23 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      - name: Install Serverless Framework
+        run: npm install -g serverless@3.39.0
+
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
-          role-to-assume: arn:aws:iam::154864927037:role/GitHubActionsRole
+          role-to-assume: arn:aws:iam::${{ vars.AWS_ACCOUNT }}:role/GitHubActionsRole
           aws-region: ${{ github.event.inputs.region }}
 
       - name: Deploy with Serverless Framework
-        run: npx serverless deploy --stage ${{ github.event.inputs.stage }} --region ${{ github.event.inputs.region }}
+        run: serverless deploy --stage ${{ github.event.inputs.stage }} --region ${{ github.event.inputs.region }}
 
   remove:
     name: Remove Serverless Application
     if: github.event.inputs.action == 'remove'
     runs-on: ubuntu-latest
+    environment: development
     permissions:
       id-token: write
       contents: read
@@ -68,11 +73,15 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      - name: Install Serverless Framework
+        run: npm install -g serverless@3.39.0
+
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
-          role-to-assume: arn:aws:iam::154864927037:role/GitHubActionsRole
+          role-to-assume: arn:aws:iam::${{ vars.AWS_ACCOUNT }}:role/GitHubActionsRole
           aws-region: ${{ github.event.inputs.region }}
+          env: AWS_ACCOUNT
 
       - name: Remove with Serverless Framework
-        run: npx serverless remove --stage ${{ github.event.inputs.stage }} --region ${{ github.event.inputs.region }}
+        run: serverless remove --stage ${{ github.event.inputs.stage }} --region ${{ github.event.inputs.region }}
