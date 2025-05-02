@@ -134,115 +134,152 @@ Run below command on your local machine:
 ```
 cat << EOF > github-actions-policy.json
 {
-  "Version": "2012-10-17",
-  "Statement": [
-    {
-      "Effect": "Allow",
-      "Action": [
-        "cloudformation:CreateStack",
-        "cloudformation:DescribeStacks",
-        "cloudformation:DeleteStack",
-        "cloudformation:UpdateStack",
-        "cloudformation:CreateChangeSet",
-        "cloudformation:DeleteChangeSet",
-        "cloudformation:DescribeChangeSet",
-        "cloudformation:ExecuteChangeSet",
-        "cloudformation:SetStackPolicy",
-        "cloudformation:ValidateTemplate"
-      ],
-      "Resource": "arn:aws:cloudformation:ap-southeast-2:<your_account>:stack/user-api-dev-dev/*"
-    },
-    {
-      "Effect": "Allow",
-      "Action": [
-        "s3:PutObject",
-        "s3:GetObject",
-        "s3:DeleteObject"
-      ],
-      "Resource": "<your_cloudformation_artifact_bucket_ARN>/*"
-    },
-    {
-      "Effect": "Allow",
-      "Action": [
-        "lambda:CreateFunction",
-        "lambda:UpdateFunctionCode",
-        "lambda:UpdateFunctionConfiguration",
-        "lambda:DeleteFunction",
-        "lambda:GetFunction",
-        "lambda:AddPermission",
-        "lambda:RemovePermission",
-        "lambda:InvokeFunction"
-      ],
-      "Resource": "arn:aws:lambda:ap-southeast-2:<your_account>:function:user-api-dev-dev-*"
-    },
-    {
-      "Effect": "Allow",
-      "Action": [
-        "apigateway:GET",
-        "apigateway:POST",
-        "apigateway:PUT",
-        "apigateway:DELETE",
-        "apigateway:PATCH"
-      ],
-      "Resource": "arn:aws:apigateway:ap-southeast-2::/restapis/*"
-    },
-    {
-      "Effect": "Allow",
-      "Action": [
-        "dynamodb:CreateTable",
-        "dynamodb:DeleteTable",
-        "dynamodb:DescribeTable",
-        "dynamodb:PutItem",
-        "dynamodb:GetItem",
-        "dynamodb:Scan"
-      ],
-      "Resource": "arn:aws:dynamodb:ap-southeast-2:<your_account>:table/user-table-dev"
-    },
-    {
-      "Effect": "Allow",
-      "Action": [
-        "sns:CreateTopic",
-        "sns:DeleteTopic",
-        "sns:GetTopicAttributes",
-        "sns:SetTopicAttributes"
-      ],
-      "Resource": "arn:aws:sns:ap-southeast-2:<your_account>:AlarmNotifications-dev"
-    },
-    {
-      "Effect": "Allow",
-      "Action": [
-        "cloudwatch:PutMetricAlarm",
-        "cloudwatch:DeleteAlarms",
-        "cloudwatch:DescribeAlarms"
-      ],
-      "Resource": "*"
-    },
-    {
-      "Effect": "Allow",
-      "Action": [
-        "logs:CreateLogGroup",
-        "logs:CreateLogStream",
-        "logs:PutLogEvents",
-        "logs:DeleteLogGroup"
-      ],
-      "Resource": "arn:aws:logs:ap-southeast-2:<your_account>:log-group:/aws/lambda/user-api-dev-dev-*:*"
-    },
-    {
-      "Effect": "Allow",
-      "Action": [
-        "iam:CreateRole",
-        "iam:DeleteRole",
-        "iam:UpdateRole",
-        "iam:AttachRolePolicy",
-        "iam:DetachRolePolicy",
-        "iam:PutRolePolicy",
-        "iam:DeleteRolePolicy",
-        "iam:GetRole",
-        "iam:PassRole"
-      ],
-      "Resource": "arn:aws:iam::<your_account>:role/user-api-dev-dev-ap-southeast-2-lambdaRole"
-    }
-  ]
+    "Version": "2012-10-17",
+    "Statement": [
+        {
+            "Effect": "Allow",
+            "Action": [
+                "cloudformation:CreateStack",
+                "cloudformation:DescribeStacks",
+                "cloudformation:DeleteStack",
+                "cloudformation:UpdateStack",
+                "cloudformation:CreateChangeSet",
+                "cloudformation:DeleteChangeSet",
+                "cloudformation:DescribeChangeSet",
+                "cloudformation:ExecuteChangeSet",
+                "cloudformation:SetStackPolicy",
+                "cloudformation:DescribeStackEvents",
+                "cloudformation:ListStackResources"
+            ],
+            "Resource": "arn:aws:cloudformation:ap-southeast-2:<your_account>:stack/user-api-dev-dev/*"
+        },
+        {
+            "Effect": "Allow",
+            "Action": [
+                "cloudformation:ValidateTemplate"
+            ],
+            "Resource": "*"
+        },
+        {
+            "Effect": "Allow",
+            "Action": [
+                "s3:GetBucketLocation",
+                "s3:ListBucket",
+                "s3:DeleteBucket"
+            ],
+            "Resource": "arn:aws:s3:::cloudformation-artifacts-bucket-zdtg4jftdws"
+        },
+        {
+            "Effect": "Allow",
+            "Action": [
+                "s3:PutObject",
+                "s3:GetObject",
+                "s3:DeleteObject",
+                "s3:DeleteObjectVersion"
+            ],
+            "Resource": "arn:aws:s3:::cloudformation-artifacts-bucket-zdtg4jftdws/*"
+        },
+        {
+            "Effect": "Allow",
+            "Action": [
+                "lambda:CreateFunction",
+                "lambda:UpdateFunctionCode",
+                "lambda:UpdateFunctionConfiguration",
+                "lambda:DeleteFunction",
+                "lambda:GetFunction",
+                "lambda:AddPermission",
+                "lambda:RemovePermission",
+                "lambda:InvokeFunction",
+                "lambda:TagResource",
+                "lambda:ListVersionsByFunction",
+                "lambda:PublishVersion"
+            ],
+            "Resource": "arn:aws:lambda:ap-southeast-2:<your_account>:function:user-api-dev-dev-*"
+        },
+        {
+            "Effect": "Allow",
+            "Action": [
+                "apigateway:GET",
+                "apigateway:POST",
+                "apigateway:PUT",
+                "apigateway:DELETE",
+                "apigateway:PATCH"
+            ],
+            "Resource": [
+                "arn:aws:apigateway:ap-southeast-2::/restapis",
+                "arn:aws:apigateway:ap-southeast-2::/restapis/*"
+            ]
+        },
+        {
+            "Effect": "Allow",
+            "Action": [
+                "apigateway:GET",
+                "apigateway:PUT",
+                "apigateway:DELETE"
+            ],
+            "Resource": "arn:aws:apigateway:ap-southeast-2::/tags/*"
+        },
+        {
+            "Effect": "Allow",
+            "Action": [
+                "dynamodb:CreateTable",
+                "dynamodb:DeleteTable",
+                "dynamodb:DescribeTable",
+                "dynamodb:PutItem",
+                "dynamodb:GetItem",
+                "dynamodb:Scan",
+                "dynamodb:TagResource"
+            ],
+            "Resource": "arn:aws:dynamodb:ap-southeast-2:<your_account>:table/user-table-dev"
+        },
+        {
+            "Effect": "Allow",
+            "Action": [
+                "sns:CreateTopic",
+                "sns:DeleteTopic",
+                "sns:GetTopicAttributes",
+                "sns:SetTopicAttributes",
+                "sns:TagResource"
+            ],
+            "Resource": "arn:aws:sns:ap-southeast-2:<your_account>:AlarmNotifications-dev"
+        },
+        {
+            "Effect": "Allow",
+            "Action": [
+                "cloudwatch:PutMetricAlarm",
+                "cloudwatch:DeleteAlarms",
+                "cloudwatch:DescribeAlarms"
+            ],
+            "Resource": "*"
+        },
+        {
+            "Effect": "Allow",
+            "Action": [
+                "logs:CreateLogGroup",
+                "logs:CreateLogStream",
+                "logs:PutLogEvents",
+                "logs:DeleteLogGroup",
+                "logs:TagResource"
+            ],
+            "Resource": "arn:aws:logs:ap-southeast-2:<your_account>:log-group:/aws/lambda/user-api-dev-dev-*:*"
+        },
+        {
+            "Effect": "Allow",
+            "Action": [
+                "iam:CreateRole",
+                "iam:DeleteRole",
+                "iam:UpdateRole",
+                "iam:AttachRolePolicy",
+                "iam:DetachRolePolicy",
+                "iam:PutRolePolicy",
+                "iam:DeleteRolePolicy",
+                "iam:GetRole",
+                "iam:PassRole",
+                "iam:TagRole"
+            ],
+            "Resource": "arn:aws:iam::<your_account>:role/user-api-dev-dev-ap-southeast-2-lambdaRole"
+        }
+    ]
 }
 EOF
 ```
