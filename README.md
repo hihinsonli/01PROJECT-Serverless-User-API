@@ -49,7 +49,7 @@ Before proceeding, ensure you have the following:
 
 <BR>
 
-## Bootstrap Steps. Run on your local machine.
+## Bootstrap Steps - Run on your local machine.
 
 <BR>
 
@@ -165,7 +165,8 @@ cat << EOF > github-actions-policy.json
             "Action": [
                 "s3:GetBucketLocation",
                 "s3:ListBucket",
-                "s3:DeleteBucket"
+                "s3:DeleteBucket",
+                "s3:ListBucketVersions"
             ],
             "Resource": "arn:aws:s3:::cloudformation-artifacts-bucket-zdtg4jftdws"
         },
@@ -322,4 +323,67 @@ Run below command on your local machine:
 aws iam attach-role-policy \
   --role-name GitHubActionsRole \
   --policy-arn arn:aws:iam::<your_account>:policy/GitHubActionsPolicy
+```
+
+## Deployment - Trigger Github Actions workflow manually
+* Update .github/workflows/main.yaml playbook to assume your account GitHubActionsRole, alternatively update GithubActions Environments `AWS_ACCOUNT` to your aws account.
+* Go to my project repository via browser. https://github.com/hihinsonli/01PROJECT-Serverless-User-API
+* Switch to Actions tab.
+* Select `Serverless Deploy and Remove` workflow on left menu
+* Click `Run workflow` dropdown on the right and select `main` for deployment branch, input stage name and aws region for deployment, and select `deploy` from `Action to perform (deploy or remove)` dropdown
+* Click `Run workflow`.
+
+<BR>
+
+Sample Deploy workflow run: https://github.com/hihinsonli/01PROJECT-Serverless-User-API/actions/runs/14791134467/job/41528347354
+
+## Results Validation
+
+#### You shall see the API endpoint for sending HTTP GET/POST request 
+![API Endpoint](results/output.jpg)
+
+#### Run below commands to add some dummy users into DynamoDB table
+```
+curl -X POST <API-Endpoint-you-retrieved-from-Github-Actions-output> \
+  -H "Content-Type: application/json" \
+  -d '{"id": "1", "name": "Hinson", "email": "contactme@hinsonli.com"}'
+
+curl -X POST <API-Endpoint-you-retrieved-from-Github-Actions-output> \
+  -H "Content-Type: application/json" \
+  -d '{"id": "2", "name": "Ray", "email": "ray.li@hinsonli.com"}'
+
+curl -X POST <API-Endpoint-you-retrieved-from-Github-Actions-output> \
+  -H "Content-Type: application/json" \
+  -d '{"id": "3", "name": "Altair", "email": "altair@hinsonli.com"}'
+```
+
+#### Run below command to query user's infomation
+```
+curl -X GET <API-Endpoint-you-retrieved-from-Github-Actions-output>
+```
+
+#### Sample results
+![Sample Results](results/http_requests.jpg)
+
+
+## Resources Cleanup
+* Go to my project repository via browser. https://github.com/hihinsonli/01PROJECT-Serverless-User-API
+* Switch to Actions tab.
+* Select `Serverless Deploy and Remove` workflow on left menu
+* Click `Run workflow` dropdown on the right and select `main` for deployment branch, input stage name and aws region for deployment, and select `remove` from `Action to perform (deploy or remove)` dropdown
+* Click `Run workflow`.
+<BR>
+Sample remove workflow run: https://github.com/hihinsonli/01PROJECT-Serverless-User-API/actions/runs/14791611609/job/41529788314
+
+* Export AWS access token locally on your machine so that you can destroy AWS resources via AWS CLI
+* Run below commands to cleanup Github Actions Access IAM policy/role
+```
+aws iam detach-role-policy --role-name GitHubActionsRole --policy-arn arn:aws:iam::<your_account>:policy/GitHubActionsPolicy
+aws iam delete-role --role-name GitHubActionsRole
+aws iam delete-policy --policy-arn arn:aws:iam::<your_account>:policy/GitHubActionsPolicy
+```
+* Delete the OIDC Provider by running
+```
+ aws iam delete-open-id-connect-provider \
+  --open-id-connect-provider-arn arn:aws:iam::<your_account>:oidc-provider/token.actions.githubusercontent.com
 ```
